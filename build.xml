@@ -1,0 +1,330 @@
+<?xml version="1.0" ?>
+<project name="DocGen Standalone" default="build-service-with-tests" basedir="." >
+    <property name="classes.dir" location="bin/classes"/>
+    <property name="testClasses.dir" location="src-test"/>
+    <property name="test.dir" location="build-test"/>
+    <property name="src.dir" location="src"/>
+    <property name="src-stubs.dir" location="stubs"/>
+    <property name="wsdl.dir" location="wsdl"/>
+    <property name="lib.dir" location="lib"/>
+    <property name="build.dir" location="build"/>
+    <property name="dg0.applet.dir" location="${build.dir}/dg0applet"/>
+    <property name="dg2.applet.dir" location="${build.dir}/dg2applet"/>
+    <property name="build.service.dir" location="${build.dir}/service"/>
+    <property name="res.dir" location="../static resources"/>
+    <property name="resources" location="resources"/>
+    <property name="service.properties" location="docgen-service.properties" />
+    <property name="service.bat" location="docgen-service.bat" />
+    <property name="java.version.compile" value="1.7" />
+    <property name="java.version.compile.target" value="${java.version.compile}" />
+    <property name="java.version.compile.source" value="${java.version.compile}" />
+
+    <path id="project.class.path">
+        <fileset dir="${lib.dir}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <target name="build-all" depends="clean-env, generate-partner-client, generate-dg0-client, generate-dg2-client, unit-test" >
+        <antcall target="package-dg0-applet"/>
+        <antcall target="package-dg2-applet"/>
+        <antcall target="copy-libs"/>
+        <antcall target="package-service"/>
+        <antcall target="updManifest"/>
+        <antcall target="sign-jars"/>
+        <antcall target="zip-resources"/>
+    </target>
+
+    <target name="build-service-with-tests" depends="build-service, unit-test">
+    </target>
+
+    <target name="build-service" depends="clean-env, generate-partner-client, generate-dg0-client, generate-dg2-client, compileTest" >
+        <antcall target="copy-libs"/>
+        <antcall target="package-service"/>
+    </target>
+
+
+    <target name="compile" description="Task for all classes compilation.">
+
+        <copy todir="${classes.dir}">
+            <fileset dir="${wsdl.dir}" />
+        </copy>
+        <copy todir="${classes.dir}">
+            <fileset dir="${resources}" />
+        </copy>
+        <javac  destdir="${classes.dir}" classpathref="project.class.path" target="${java.version.compile.target}" source="${java.version.compile.source}" debug="yes">
+            <src path="${src.dir}"/>
+            <src path="${src-stubs.dir}"/>
+        </javac>
+    </target>
+
+    <target name="compileTest" depends="compile" description="compile jUnit Test cases">
+        <javac srcdir="${testClasses.dir}" destdir="${test.dir}" includeantruntime="true" nowarn="yes" debug="true">
+         <classpath>
+             <path refid="project.class.path"/>
+             <pathelement location="${classes.dir}"/>
+         </classpath>
+        </javac>
+
+    </target>
+
+    <target name="clean-env">
+        <delete dir="${build.dir}" failonerror="false"/>
+        <delete dir="${classes.dir}" failonerror="false"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${build.service.dir}"/>
+        <mkdir dir="${dg0.applet.dir}"/>
+        <mkdir dir="${dg2.applet.dir}"/>
+    </target>
+
+	<target name="zip-resources" description="Generates DocGenApplet and DocGenJasper resources.">
+		<mkdir dir="${res.dir}"/>
+		<zip destfile="${res.dir}/DocGenApplet.resource" update="true">
+		    <fileset dir="${build.dir}" includes="jrv.jar"/>
+  	    </zip>
+		<zip destfile="${res.dir}/DocGenJasper.resource" update="true">
+            <fileset dir="${build.dir}">
+                <include name="commons-collections-2.1.1.jar"/>
+                <include name="commons-digester-1.7.jar"/>
+                <include name="commons-logging-1.0.4.jar"/>
+                <include name="jasperreports-4.1.2.jar"/>
+                <include name="iText-2.1.7.jar"/>
+            </fileset>
+        </zip>
+	</target>
+	
+	<target name="copy-libs">
+        <copy todir="${build.dir}">
+        	<!-- Jasper -->
+            <fileset dir="${lib.dir}">
+                <include name="commons-collections-2.1.1.jar"/>
+                <include name="commons-digester-1.7.jar"/>
+                <include name="commons-logging-1.0.4.jar"/>
+                <include name="jasperreports-4.1.2.jar"/>
+                <include name="iText-2.1.7.jar"/>
+            </fileset>
+        </copy>
+	</target>
+
+	<target name="package-dg0-applet">
+		<jar destfile="${dg0.applet.dir}/jrv.jar" basedir="${classes.dir}" excludes="**/_class/dg2/**/*.class">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+                <attribute name="Main-Class" value="com.salesoptimizer.sforce.applets.DocGenApplet"/>
+            </manifest>
+		</jar>
+	</target>
+
+    <target name="package-dg2-applet"  >
+        <jar destfile="${dg2.applet.dir}/jrv.jar" basedir="${classes.dir}" excludes="**/_class/dg0/**/*.class">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+                <attribute name="Main-Class" value="com.salesoptimizer.sforce.applets.DocGenApplet"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="package-service">
+        <mkdir dir="${build.service.dir}"/>
+        <jar destfile="${build.service.dir}/docgen-service.jar" filesetmanifest="skip" basedir="${classes.dir}" >
+            <zipgroupfileset dir="${build.dir}">
+                <include name="*.jar" />
+                <exclude name="META-INF/*.SF"/>
+                <exclude name="jrv.jar"/>
+            </zipgroupfileset>
+            <manifest>
+                <attribute name="Application-Name" value="DocGen Service"/>
+                <attribute name="Class-Path" value="$.{project.class.path}" />
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Main-Class" value="com.salesoptimizer.service.DocGenService" />
+            </manifest>
+        </jar>
+        <copy file="${service.properties}" todir="${build.service.dir}"/>
+        <copy file="${service.bat}" todir="${build.service.dir}"/>
+    </target>
+
+    <pathconvert property="mf.classpath" pathsep=" ">
+        <path refid="project.class.path"/>
+        <mapper>
+            <chainedmapper>
+                <flattenmapper/>
+                <globmapper from="*.jar" to="lib/*.jar"/>
+            </chainedmapper>
+        </mapper>
+    </pathconvert>
+
+    <target name="generate-dg2-client" >
+        <exec executable="${java.home}/../bin/wsimport">
+            <arg line="wsdl/DocGenService.wsdl -s stubs  -B-XautoNameResolution -Xnocompile"/>
+        </exec>
+
+        <exec executable="${java.home}/../bin/wsimport">
+            <arg line="wsdl/partner.wsdl -s stubs  -B-XautoNameResolution -Xnocompile"/>
+        </exec>
+    </target>
+    <target name="generate-dg0-client" >
+        <exec executable="${java.home}/../bin/wsimport">
+            <arg line="wsdl/DocGenService-dg0.wsdl -s stubs  -B-XautoNameResolution -Xnocompile"/>
+        </exec>
+
+        <exec executable="${java.home}/../bin/wsimport">
+            <arg line="wsdl/partner.wsdl -s stubs  -B-XautoNameResolution -Xnocompile"/>
+        </exec>
+    </target>
+    <target name="generate-partner-client" >
+        <exec executable="${java.home}/../bin/wsimport">
+            <arg line="wsdl/partner.wsdl -s stubs  -B-XautoNameResolution -Xnocompile"/>
+        </exec>
+    </target>
+	<!--	
+	<target name="compile-reports">
+		<mkdir dir="${build.dir}/reports"/> 
+		<taskdef name="jrc" classname="net.sf.jasperreports.ant.JRAntCompileTask"> 
+			<classpath refid="project.class.path"/>
+		</taskdef>
+		<jrc 
+			destdir="${build.dir}/reports"
+			tempdir="${build.dir}/reports"
+			keepjava="false">
+			<src>
+				<fileset dir="reports">
+					<include name="**/*.jrxml"/>
+				</fileset>
+			</src>
+			<classpath refid="project.class.path"/>
+		</jrc> 
+		<copy todir="${build.dir}/reports">
+			<fileset dir="reports">
+				<exclude name="**/*.jrxml"/>
+			</fileset>
+		</copy>
+		<copy todir="${classes.dir}/com/salesoptimizer/sforce/applets">
+			<fileset dir="${build.dir}/reports">
+				<exclude name="**/*.jrxml"/>
+			</fileset>
+		</copy>
+	</target>
+ 	-->
+
+	<target name="sign-jars">
+        <!--
+		<signjar keystore="SalesOptimizer" alias="SalesOptimizer" storepass="Interstate4" keypass="Interstate4" verbose="true" >
+			<fileset dir="${build.dir}" casesensitive="no">
+				<patternset>
+				    <include name="*.jar"/>
+				</patternset>
+			</fileset>
+		</signjar>    -->
+        <signjar keystore="salesoptimizer.jks" alias="mykey" storepass="Interstate4" keypass="Interstate4" verbose="true">
+            <fileset dir="${build.dir}" casesensitive="no" >
+                <patternset>
+                    <include name="*.jar"/>
+                    <include name="**/*applet/*.jar"/>
+                </patternset>
+            </fileset>
+        </signjar>
+	</target>
+
+    <target name="updManifest">
+        <jar file="${build.dir}/commons-collections-2.1.1.jar" update="true">
+            <manifest>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+            </manifest>
+        </jar>
+        <jar file="${build.dir}/jasperreports-4.1.2.jar" update="true">
+        <manifest>
+            <attribute name="Application-Name" value="DocGen"/>
+            <attribute name="Trusted-Library" value="true"/>
+            <attribute name="Permissions" value="all-permissions"/>
+            <attribute name="Codebase" value="*" />
+            <attribute name="Application-Library-Allowable-Codebase" value="*" />
+            <attribute name="Caller-Allowable-Codebase" value="*" />
+        </manifest>
+    </jar>
+        <jar file="${build.dir}/commons-digester-1.7.jar" update="true">
+            <manifest>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+            </manifest>
+        </jar>
+        <jar file="${build.dir}/commons-logging-1.0.4.jar" update="true">
+            <manifest>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+            </manifest>
+        </jar>
+        <jar file="${build.dir}/iText-2.1.7.jar" update="true">
+            <manifest>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+            </manifest>
+        </jar>
+        <!-- check is it in build dir-->
+        <jar file="${build.dir}/ms-arial.jar" update="true">
+            <manifest>
+                <attribute name="Application-Name" value="DocGen"/>
+                <attribute name="Trusted-Library" value="true"/>
+                <attribute name="Permissions" value="all-permissions"/>
+                <attribute name="Codebase" value="*" />
+                <attribute name="Application-Library-Allowable-Codebase" value="*" />
+                <attribute name="Caller-Allowable-Codebase" value="*" />
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="unit-test" depends="compileTest">
+
+        <mkdir dir="./test-reports"/>
+
+        <junit printsummary="yes" haltonfailure="no">
+            <classpath>
+                <pathelement location="./lib/junit-4.10.jar"/>
+                <path refid="project.class.path" />
+                <pathelement location="${test.dir}" />
+                <pathelement location="${classes.dir}"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+
+            <batchtest fork="yes" todir="./test-reports">
+                <fileset dir="src-test">
+                    <include name="**/*Test*.java"/>
+                    <exclude name="**/TestUtils.java"/>
+                </fileset>
+            </batchtest>
+        </junit>
+
+    </target>
+</project>
