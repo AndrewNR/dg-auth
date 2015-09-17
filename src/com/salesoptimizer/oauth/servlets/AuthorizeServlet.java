@@ -65,9 +65,7 @@ public class AuthorizeServlet extends HttpServlet {
             return;
         }
         
-        // TODO: save tokenSecret somewhere; it will be needed in CallbackServlet!!!
-        // OauthHelperUtils.REQUEST_TOKENS.put(accessor.requestToken, accessor.tokenSecret);
-        
+        AuthorizeManager.getInstance().setAuthTokenSecret(accessor.requestToken, accessor.tokenSecret);
         try {
             String authUrl = OAuthUtils.buildAuthorizationUrl(accessor, settings.urlAuthorization);
             log.info("Authorization URL=" + authUrl);

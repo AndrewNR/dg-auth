@@ -49,6 +49,7 @@
 		 -->
 	</dependencies>
 	<build>
+		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -94,6 +95,14 @@
 	                </execution>
 	            </executions>
 	        </plugin>
+	        <plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-war-plugin</artifactId>
+		        <version>2.3</version>
+		        <configuration>
+		          <warName>docgen-auth</warName>
+		        </configuration>
+		      </plugin>
 		</plugins>
 		<pluginManagement>
 		<plugins>

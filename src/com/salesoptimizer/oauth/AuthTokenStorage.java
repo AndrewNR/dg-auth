@@ -7,6 +7,7 @@ public class AuthTokenStorage {
 
     private static AuthTokenStorage instance;
     private static final Map<String, String> tokensMap = new HashMap<String, String>();
+    private static final Map<String, String> tokenSecretsMap = new HashMap<String, String>();
 
     private AuthTokenStorage() {
     }
@@ -26,6 +27,13 @@ public class AuthTokenStorage {
     void setToken(String key, String token) {
         // TODO write to db
         tokensMap.put(key, token);
+    }
+
+    String getTokenSecret(String authToken) {
+        return tokenSecretsMap.get(authToken);
+    }
+    String setTokenSecret(String authToken, String authTokenSecret) {
+        return tokenSecretsMap.get(authToken);
     }
 
 }

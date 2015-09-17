@@ -1,6 +1,7 @@
 package com.salesoptimizer.oauth;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,12 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -152,4 +159,93 @@ public class OAuthUtils {
         return results;
     }
 
+
+
+    static final SAXParserFactory PARSER;
+    static final String KEY_SERVER_URL = "serverUrl";
+    static final String KEY_METADATA_SERVER_URL = "metadataServerUrl";
+    static final String KEY_SESSION_ID = "sessionId";
+    static final String KEY_SANDBOX = "sandbox";
+    static final String KEY_RESPONSE = "response";
+    static final String KEY_MESSAGE = "message";
+    static final String KEY_ERROR = "error";
+
+    static {
+        PARSER = SAXParserFactory.newInstance();
+        PARSER.setNamespaceAware(false);
+    }
+
+    // parses xml returned in the resonse
+    public static XmlResponseHandler parseResponse(String response) throws Exception {
+        XmlResponseHandler handler = new XmlResponseHandler();
+        PARSER.newSAXParser().parse(new ByteArrayInputStream(response.getBytes()), handler);
+        return handler;
+    }
+
+    public static class XmlResponseHandler extends DefaultHandler {
+
+        private Map<String, String> xmlContent = new HashMap<String, String>();
+        private String thisXmlTag;
+
+        @Override
+        public void startElement(String namespaceURI, String localName, String qualifiedName, Attributes atts)
+                throws SAXException {
+            thisXmlTag = qualifiedName;
+        }
+
+        @Override
+        public void endElement(String namespaceURI, String localName, String qualifiedName) throws SAXException {
+            thisXmlTag = null;
+        }
+
+        @Override
+        public void characters(char[] text, int start, int length) throws SAXException {
+            if (thisXmlTag != null) {
+                xmlContent.put(thisXmlTag, new String(text, start, length));
+            }
+        }
+
+        /**
+         * @return the associated session
+         */
+        public String getSessionId() {
+            return xmlContent.get(KEY_SESSION_ID);
+        }
+
+        /**
+         * @return the server url
+         */
+        public String getServerUrl() {
+            return xmlContent.get(KEY_SERVER_URL);
+        }
+
+        /**
+         * @return the url for the metadata
+         */
+        public String getMetadataServerUrl() {
+            return xmlContent.get(KEY_METADATA_SERVER_URL);
+        }
+
+        /**
+         * @return boolean if sandbox org
+         */
+        public boolean isSandbox() {
+            return Boolean.valueOf(xmlContent.get(KEY_SANDBOX));
+        }
+
+        /**
+         * @return the associated message
+         */
+        public String getMessage() {
+            return xmlContent.get(KEY_MESSAGE);
+        }
+
+        /**
+         * @return the associated error
+         */
+        public String getError() {
+            return xmlContent.get(KEY_ERROR);
+        }
+
+    }
 }
