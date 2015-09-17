@@ -3,7 +3,7 @@
 <p>This application demonstrates the use of the OAuth protocol with Salesforce.com's Remote Access applications. 
 It uses OAuth to access Accounts and Contacts via the Web Services API.</p>
 
-<form action="/auth" method="POST">
+<form action="./auth" method="POST">
 	<table>
 		<tr>
 			<td>Consumer key</td>
