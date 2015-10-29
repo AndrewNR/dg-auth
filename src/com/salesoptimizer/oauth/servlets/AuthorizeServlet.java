@@ -21,7 +21,12 @@ import com.salesoptimizer.oauth.OAuthUtils;
 public class AuthorizeServlet extends HttpServlet {
 
     protected static final Logger log = Logger.getLogger(AuthorizeServlet.class.getName());
-
+    
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doGet(req, resp);
+    }
+    
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         AuthParams params = buildAuthParams(req.getParameterMap());
@@ -40,10 +45,10 @@ public class AuthorizeServlet extends HttpServlet {
     }
 
     private void doAuthorize(AuthorizeManager authManager, AuthParams params, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String oauthCallbackUrl = new StringBuilder("https://").append(req.getServerName())
-                .append(req.getContextPath())
-                .append("/callback").toString();
-        log.info("oauthCallbackUrl: 'https://{serverName}{contextPath}/callback' = " + oauthCallbackUrl);
+        String oauthCallbackUrl = new StringBuilder("https://")
+                .append(req.getServerName()).append(":").append(req.getLocalPort())
+                .append(req.getContextPath()).append("/callback").toString();
+        log.info("oauthCallbackUrl: 'https://{serverName}:{localPort}{contextPath}/callback' = " + oauthCallbackUrl);
         
         OAuthAccessor accessor = new OAuthAccessor(new OAuthConsumer(
                 oauthCallbackUrl,

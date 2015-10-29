@@ -2,17 +2,19 @@
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd" 
     version="3.1">
+    
 	<servlet>
 		<servlet-name>AuthorizeServlet</servlet-name>
-		<servlet-class>com.salesoptimzier.oauth.servlets.AuthorizeServlet</servlet-class>
+		<servlet-class>com.salesoptimizer.oauth.servlets.AuthorizeServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>AuthorizeServlet</servlet-name>
 		<url-pattern>/auth</url-pattern>
 	</servlet-mapping>
+	
     <servlet>
         <servlet-name>CallbackServlet</servlet-name>
-        <servlet-class>com.salesoptimzier.oauth.servlets.CallbackServlet</servlet-class>
+        <servlet-class>com.salesoptimizer.oauth.servlets.CallbackServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>CallbackServlet</servlet-name>
@@ -37,7 +39,4 @@
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 	
-	<error-page>
-		<location>/error.jsp</location>
-	</error-page>
 </web-app>
