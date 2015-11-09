@@ -1,5 +1,7 @@
 package com.salesoptimizer.oauth;
 
+import java.util.List;
+
 public class AuthorizeManager {
     
     private static AuthorizeManager instance;
@@ -15,16 +17,21 @@ public class AuthorizeManager {
     }
     
     public boolean isAuthorized(AuthParams params) {
-        return params != null && getAuthToken(params.getOrgId()) != null;
+        return CommonUtils.isNotBlank(getAuthToken(params));
     }
-
+    
     public String getAuthToken(AuthParams params) {
-        return params != null ? getAuthToken(params.getOrgId()) : "";
+        return params != null ? getAuthToken(params.getAuthTokenKey()) : null;
     }
-    public String getAuthToken(String key) {
+    public void setAuthToken(AuthParams params, String sessionId) {
+        if (params != null) {
+            setAuthToken(params.getAuthTokenKey(), sessionId);
+        }
+    }
+    private String getAuthToken(String key) {
         return AuthTokenStorage.getInstance().getToken(key);
     }
-    public void setAuthToken(String orgId, String sessionId) {
+    private void setAuthToken(String orgId, String sessionId) {
         AuthTokenStorage.getInstance().setToken(orgId, sessionId);
     }
 
@@ -33,6 +40,10 @@ public class AuthorizeManager {
     }
     public String setAuthTokenSecret(String tokenKey, String tokenSecret) {
         return AuthTokenStorage.getInstance().setTokenSecret(tokenKey, tokenSecret);
+    }
+
+    public List<String> listTokenKeys() {
+        return AuthTokenStorage.getInstance().getTokenKeys();
     }
 
 }

@@ -8,11 +8,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.salesoptimizer.oauth.AuthConstants;
 import com.salesoptimizer.oauth.AuthParams;
 import com.salesoptimizer.oauth.AuthorizeManager;
 import com.salesoptimizer.oauth.OAuthSettings;
 import com.salesoptimizer.oauth.OAuthUtils;
-import com.salesoptimizer.oauth.TempStorage;
 
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
@@ -27,6 +27,7 @@ public class CallbackServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
         try {
+            log.info("Callback:: queryStr: " + req.getQueryString());
             String oauthToken = (String) req.getParameter(OAuth.OAUTH_TOKEN);
             String oauthConsumerKey = (String) req.getParameter(OAuth.OAUTH_CONSUMER_KEY);
             String oauthVerifier = (String) req.getParameter(OAuth.OAUTH_VERIFIER);
@@ -34,8 +35,8 @@ public class CallbackServlet extends HttpServlet {
             log.info("oauthConsumerKey=" + oauthConsumerKey);
             log.info("oauthVerifier=" + oauthVerifier);
             
-            OAuthSettings settings = (OAuthSettings) TempStorage.getInstance().get(TempStorage.KEY_SETTINGS);
-            AuthParams params = (AuthParams) TempStorage.getInstance().get(TempStorage.KEY_PARAMS);
+            OAuthSettings settings = (OAuthSettings) req.getSession().getAttribute(AuthConstants.SESSION_ATTR_SETTINGS);
+            AuthParams params = (AuthParams) req.getSession().getAttribute(AuthConstants.SESSION_ATTR_PARAMS);
             
             OAuthAccessor accessor = new OAuthAccessor(new OAuthConsumer(
                     params.getRedirectUri(), params.getConsumerKey(),
@@ -58,10 +59,11 @@ public class CallbackServlet extends HttpServlet {
                 log.info("service endpoint=" + serviceEndpoint);
                 log.info("sessionId=" + sessionId);
                 
-                // Store sessionId for appId
-                AuthorizeManager.getInstance().setAuthToken(params.getOrgId(), sessionId);
+                // FIXME: should we store accessToken instead? SessionId will expire, while accessToken should stay valid
+                // Store authentication info
+                AuthorizeManager.getInstance().setAuthToken(params, sessionId);
             }
-            resp.sendRedirect("/auth");
+            resp.sendRedirect(req.getContextPath() + "/auth");
         } catch (Exception e) {
             log.info("Callback servlet exception=" + e.toString());
         }

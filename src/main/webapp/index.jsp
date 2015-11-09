@@ -1,8 +1,5 @@
 <%@ include file="top.jsp" %>
 
-<p>This application demonstrates the use of the OAuth protocol with Salesforce.com's Remote Access applications. 
-It uses OAuth to access Accounts and Contacts via the Web Services API.</p>
-
 <form action="<%=application.getContextPath()%>/auth" method="POST">
 	<table>
 		<tr>

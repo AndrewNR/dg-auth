@@ -7,3 +7,4 @@
 
   <body>
     <h1>OAuth Demo</h1>
+    <p>This application implements OAuth 2.0 protocol to login into Salesforce.com (via Remote Access applications).</p>

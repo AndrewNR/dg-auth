@@ -5,8 +5,6 @@ package com.salesoptimizer.oauth;
  */
 public class AuthParams {
     
-    public enum OrgType {PRODUCTION, SANDBOX}
-    
     private String orgId = "";
     private Boolean sandbox = false;
     private String consumerKey = "";
@@ -42,6 +40,10 @@ public class AuthParams {
     }
     public void setRedirectUri(String redirectUri) {
         this.redirectUri = redirectUri;
+    }
+    
+    public String getAuthTokenKey() {
+        return getOrgId() != null && !getOrgId().isEmpty() ? getOrgId() : getConsumerKey();
     }
     
 }

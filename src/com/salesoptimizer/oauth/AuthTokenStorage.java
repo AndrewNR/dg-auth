@@ -1,6 +1,9 @@
 package com.salesoptimizer.oauth;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AuthTokenStorage {
@@ -33,7 +36,17 @@ public class AuthTokenStorage {
         return tokenSecretsMap.get(authToken);
     }
     String setTokenSecret(String authToken, String authTokenSecret) {
-        return tokenSecretsMap.get(authToken);
+        return tokenSecretsMap.put(authToken, authTokenSecret);
+    }
+
+    public List<String> getTokenKeys() {
+        // TODO read list from db
+        List<String> result = new ArrayList<String>();
+        if (tokensMap != null) {
+            result.addAll(tokensMap.keySet());
+            Collections.sort(result);
+        }
+        return result;
     }
 
 }

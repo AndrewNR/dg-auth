@@ -12,8 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
 
+import com.salesoptimizer.oauth.AuthConstants;
 import com.salesoptimizer.oauth.AuthParams;
 import com.salesoptimizer.oauth.AuthorizeManager;
+import com.salesoptimizer.oauth.CommonUtils;
 import com.salesoptimizer.oauth.OAuthSettings;
 import com.salesoptimizer.oauth.OAuthUtils;
 
@@ -29,7 +31,11 @@ public class AuthorizeServlet extends HttpServlet {
     
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AuthParams params = buildAuthParams(req.getParameterMap());
+        AuthParams params = (AuthParams) req.getSession().getAttribute(AuthConstants.SESSION_ATTR_PARAMS);
+        if (params == null) {
+            params = buildAuthParams(req.getParameterMap());
+            req.getSession().setAttribute(AuthConstants.SESSION_ATTR_PARAMS, params);
+        }
         AuthorizeManager authManager = AuthorizeManager.getInstance();
         if (authManager.isAuthorized(params)) {
             respondAuthorized(req, resp, authManager.getAuthToken(params));
@@ -45,6 +51,12 @@ public class AuthorizeServlet extends HttpServlet {
     }
 
     private void doAuthorize(AuthorizeManager authManager, AuthParams params, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        OAuthSettings settings = (OAuthSettings) req.getSession().getAttribute(AuthConstants.SESSION_ATTR_SETTINGS);
+        if (settings == null) {
+            settings = new OAuthSettings(params.isSandbox());
+            req.getSession().setAttribute(AuthConstants.SESSION_ATTR_SETTINGS, settings);
+        }
+        
         String oauthCallbackUrl = new StringBuilder("https://")
                 .append(req.getServerName()).append(":").append(req.getLocalPort())
                 .append(req.getContextPath()).append("/callback").toString();
@@ -56,7 +68,6 @@ public class AuthorizeServlet extends HttpServlet {
                 params.getConsumerSecret(),
                 null));
         
-        OAuthSettings settings = new OAuthSettings(params.isSandbox());
         String response = OAuthUtils.getRequestToken(accessor, settings.urlRequestToken, oauthCallbackUrl);
         log.info("Request token=" + accessor.requestToken);
         log.info("Request token secret=" + accessor.tokenSecret);
@@ -70,8 +81,9 @@ public class AuthorizeServlet extends HttpServlet {
             return;
         }
         
-        AuthorizeManager.getInstance().setAuthTokenSecret(accessor.requestToken, accessor.tokenSecret);
         try {
+            AuthorizeManager.getInstance().setAuthTokenSecret(accessor.requestToken, accessor.tokenSecret);
+
             String authUrl = OAuthUtils.buildAuthorizationUrl(accessor, settings.urlAuthorization);
             log.info("Authorization URL=" + authUrl);
             resp.sendRedirect(authUrl);
@@ -82,11 +94,11 @@ public class AuthorizeServlet extends HttpServlet {
 
     private static AuthParams buildAuthParams(Map<String, String[]> requestParams) {
         AuthParams params = new AuthParams();
-        params.setOrgId(getParamWithDefault(requestParams, "orgId"));
-        params.setSandbox("sandbox".equalsIgnoreCase( getParamWithDefault(requestParams, "orgType") ));
-        params.setConsumerKey(getParamWithDefault(requestParams, "consumerKey"));
-        params.setConsumerSecret(getParamWithDefault(requestParams, "consumerSecret"));
-        params.setRedirectUri(getParamWithDefault(requestParams, "redirectUri"));
+        params.setOrgId(getParamWithDefault(requestParams, AuthConstants.PARAM_ORG_ID));
+        params.setSandbox(AuthConstants.ORG_TYPE_SANDBOX.equalsIgnoreCase( getParamWithDefault(requestParams, AuthConstants.PARAM_ORG_TYPE) ));
+        params.setConsumerKey(getParamWithDefault(requestParams, AuthConstants.PARAM_CONSUMER_KEY));
+        params.setConsumerSecret(getParamWithDefault(requestParams, AuthConstants.PARAM_CONSUMER_SECRET));
+        params.setRedirectUri(getParamWithDefault(requestParams, AuthConstants.PARAM_REDIRECT_URI));
         return params;
     }
 
@@ -96,7 +108,7 @@ public class AuthorizeServlet extends HttpServlet {
 
     private static String getParamWithDefault(Map<String, String[]> params, String key, String defaultValue) {
         String result = getParamValue(params, key);
-        return result != null ? result : defaultValue;
+        return CommonUtils.isNotEmpty(result) ? result : defaultValue;
     }
 
     private static String getParamValue(Map<String, String[]> params, String key) {
