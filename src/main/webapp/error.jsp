@@ -1,9 +1,10 @@
 <%@ include file="top.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<h2>404 Not Found</h2>
+<c:set var="errorMsg" value="${requestScope['errorMsg']}" />
 
-Sorry, the page you requested is not found.
+<h2>Errors, errors. . .</h2>
 
-<p><a href="index">Return to Index page</a></p>
+<h3 style="color:red;">ERROR: ${errorMsg != null ? errorMsg : "An error occurred."}</h3>
 
 <%@ include file="bottom.jsp" %>

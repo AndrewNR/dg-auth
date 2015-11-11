@@ -38,6 +38,7 @@ public class AuthorizeServlet extends HttpServlet {
         }
         AuthorizeManager authManager = AuthorizeManager.getInstance();
         if (authManager.isAuthorized(params)) {
+            cleanupTempSessionValues(req, resp);
             respondAuthorized(req, resp, authManager.getAuthToken(params));
             return;
         } else {
@@ -45,12 +46,18 @@ public class AuthorizeServlet extends HttpServlet {
         }
     }
 
+    private void cleanupTempSessionValues(HttpServletRequest req, HttpServletResponse resp) {
+        req.getSession().removeAttribute(AuthConstants.SESSION_ATTR_PARAMS);
+        req.getSession().removeAttribute(AuthConstants.SESSION_ATTR_SETTINGS);
+    }
+
     private void respondAuthorized(HttpServletRequest req, HttpServletResponse resp, String authToken) throws ServletException, IOException {
         req.setAttribute("authToken", authToken);
         req.getRequestDispatcher("/authSuccess.jsp").forward(req, resp);
     }
 
-    private void doAuthorize(AuthorizeManager authManager, AuthParams params, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    private void doAuthorize(AuthorizeManager authManager, AuthParams params,
+            HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         OAuthSettings settings = (OAuthSettings) req.getSession().getAttribute(AuthConstants.SESSION_ATTR_SETTINGS);
         if (settings == null) {
             settings = new OAuthSettings(params.isSandbox());
@@ -73,11 +80,13 @@ public class AuthorizeServlet extends HttpServlet {
         log.info("Request token secret=" + accessor.tokenSecret);
         log.info("Response=" + response);
         
-        if (response.startsWith("<")) {
+        if (response.startsWith("<") ||
+                CommonUtils.isBlank(accessor.requestToken) ||
+                CommonUtils.isBlank(accessor.tokenSecret)) {
             log.warning("Failed to get request token.");
-            resp.setContentType("text/html; charset=UTF-8");
-            resp.getWriter().println("Request token failure!!");
-            resp.getWriter().println(response);
+            resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            req.setAttribute(AuthConstants.PARAM_ERROR_MSG, "Request token failure: " + response);
+            req.getRequestDispatcher("/error.jsp").forward(req, resp);
             return;
         }
         

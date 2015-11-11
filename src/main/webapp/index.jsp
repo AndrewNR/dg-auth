@@ -1,6 +1,9 @@
 <%@ include file="top.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<form action="<%=application.getContextPath()%>/auth" method="POST">
+<c:set var="contextPath" value="${pageContext.request.contextPath}" />
+
+<form action="${contextPath}/auth" method="POST">
 	<table>
 		<tr>
 			<td>Consumer key</td>
