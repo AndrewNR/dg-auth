@@ -1,6 +1,6 @@
-<%@ include file="top.jsp" %>
+<%@ include file="top.jspf" %>
 
 <h3>Congratulations!</h3>
 Authorized successfully. AuthToken: "${requestScope['authToken']}"
 
-<%@ include file="bottom.jsp" %>
+<%@ include file="bottom.jspf" %>

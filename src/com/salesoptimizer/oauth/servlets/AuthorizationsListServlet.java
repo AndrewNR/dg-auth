@@ -11,24 +11,43 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.salesoptimizer.oauth.AuthConstants;
 import com.salesoptimizer.oauth.AuthorizeManager;
+import com.salesoptimizer.oauth.CommonUtils;
 
 public class AuthorizationsListServlet extends HttpServlet {
     
     private static final long serialVersionUID = 1L;
 	
+    private static final String ACTION_TYPE_DELETE = "DELETE";
+    private static final String PARAM_DELETE_TYPE = "deleteType";
     private static final String DELETE_TYPE_SINGLE = "SINGLE";
     private static final String DELETE_TYPE_ALL = "ALL";
+    private static final String PARAM_ITEM_ID = "itemId";
+    
     private static final String ATTR_AVAILABLE_ITEMS = "availableItems";
-    private static final String PARAM_DELETE_TYPE = "deleteType";
     
     private static final String ERROR_MSG_DELETE_SINGLE_NOT_IMPLEMENTED = "Deleting single item not implemented yet.";
     private static final String ERROR_MSG_DELETE_ALL_NOT_IMPLEMENTED = "Deleting all items not implemented yet.";
-    
-	@Override
+
+
+
+    @Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// process list
 	    request.setAttribute(ATTR_AVAILABLE_ITEMS, buildAvailableItems(AuthorizeManager.getInstance()));
 	    request.getRequestDispatcher("/authList.jsp").forward(request, response);
+	}
+	
+	@Override
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	    String actionType = request.getParameter(AuthConstants.PARAM_ACTION_TYPE);
+	    if (ACTION_TYPE_DELETE.equalsIgnoreCase(actionType)) {
+	        doDelete(request, response);
+	    } else {
+	        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
+            request.setAttribute(AuthConstants.PARAM_ERROR_MSG, "Cannot process ActionType: " + actionType);
+            request.getRequestDispatcher("/authList.jsp").forward(request, response);
+            return;
+	    }
 	}
 
 	private static List<String> buildAvailableItems(AuthorizeManager instance) {
@@ -66,14 +85,22 @@ public class AuthorizationsListServlet extends HttpServlet {
     }
     
     private void doDeleteAll(HttpServletRequest request, HttpServletResponse response) {
-        // FIXME: implement
-        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-        request.setAttribute(AuthConstants.PARAM_ERROR_MSG, ERROR_MSG_DELETE_ALL_NOT_IMPLEMENTED);
+        if (AuthorizeManager.getInstance().deleteAllTokens()) {
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            request.setAttribute(AuthConstants.PARAM_ERROR_MSG, "Failed to delete all tokens.");
+        }
+        
     }
 
     private void doDeleteSingleItem(HttpServletRequest request, HttpServletResponse response) {
-        // FIXME: implement
-        response.setStatus(HttpServletResponse.SC_NOT_IMPLEMENTED);
-        request.setAttribute(AuthConstants.PARAM_ERROR_MSG, ERROR_MSG_DELETE_SINGLE_NOT_IMPLEMENTED);
+        String itemId = request.getParameter(PARAM_ITEM_ID);
+        if (CommonUtils.isNotBlank(itemId) && AuthorizeManager.getInstance().deleteToken(itemId)) {
+            response.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            request.setAttribute(AuthConstants.PARAM_ERROR_MSG, "Failed to delete token: '" + itemId + "'");
+        }
     }
 }

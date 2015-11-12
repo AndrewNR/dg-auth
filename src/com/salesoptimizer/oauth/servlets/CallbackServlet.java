@@ -61,7 +61,7 @@ public class CallbackServlet extends HttpServlet {
                 
                 // FIXME: should we store accessToken instead? SessionId will expire, while accessToken should stay valid
                 // Store authentication info
-                AuthorizeManager.getInstance().setAuthToken(params, sessionId);
+                AuthorizeManager.getInstance().setAuthToken(params, accessor.accessToken);
             }
             resp.sendRedirect(req.getContextPath() + "/auth");
         } catch (Exception e) {

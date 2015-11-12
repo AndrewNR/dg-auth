@@ -45,5 +45,13 @@ public class AuthorizeManager {
     public List<String> listTokenKeys() {
         return AuthTokenStorage.getInstance().getTokenKeys();
     }
+    
+    public boolean deleteToken(String key) {
+        return AuthTokenStorage.getInstance().deleteToken(key);
+    }
+    
+    public boolean deleteAllTokens() {
+        return AuthTokenStorage.getInstance().deleteAllTokens();
+    }
 
 }

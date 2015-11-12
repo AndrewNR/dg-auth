@@ -8,7 +8,6 @@
     <servlet-name>AuthorizeServlet</servlet-name>
     <url-pattern>/auth</url-pattern>
   </servlet-mapping>
-  
   <servlet>
     <servlet-name>CallbackServlet</servlet-name>
     <servlet-class>com.salesoptimizer.oauth.servlets.CallbackServlet</servlet-class>
@@ -17,7 +16,6 @@
     <servlet-name>CallbackServlet</servlet-name>
     <url-pattern>/callback</url-pattern>
   </servlet-mapping>
-  
   <servlet>
     <servlet-name>AuthorizationsListServlet</servlet-name>
     <servlet-class>com.salesoptimizer.oauth.servlets.AuthorizationsListServlet</servlet-class>
@@ -26,8 +24,6 @@
     <servlet-name>AuthorizationsListServlet</servlet-name>
     <url-pattern>/authList</url-pattern>
   </servlet-mapping>
-  
-  
   <servlet>
     <servlet-name>index</servlet-name>
     <jsp-file>/index.jsp</jsp-file>

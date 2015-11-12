@@ -84,6 +84,8 @@ public class AuthorizeServlet extends HttpServlet {
                 CommonUtils.isBlank(accessor.requestToken) ||
                 CommonUtils.isBlank(accessor.tokenSecret)) {
             log.warning("Failed to get request token.");
+            
+            cleanupTempSessionValues(req, resp);
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             req.setAttribute(AuthConstants.PARAM_ERROR_MSG, "Request token failure: " + response);
             req.getRequestDispatcher("/error.jsp").forward(req, resp);

@@ -16,6 +16,7 @@ public final class AuthConstants {
     public static final String PARAM_ERROR_MSG = "errorMsg";
     
     public static final String ORG_TYPE_SANDBOX = "sandbox";
+    public static final String PARAM_ACTION_TYPE = "actionType";
     
     
 }

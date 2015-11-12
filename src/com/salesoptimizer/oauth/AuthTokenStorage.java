@@ -49,4 +49,22 @@ public class AuthTokenStorage {
         return result;
     }
 
+    public boolean deleteToken(String key) {
+        boolean result = false;
+        if (tokensMap.containsKey(key)) {
+            tokensMap.remove(key);
+            result = true;
+        }
+        return result;
+    }
+    
+    public boolean deleteAllTokens() {
+        boolean result = false;
+        if (!tokensMap.isEmpty()) {
+            tokensMap.clear();
+            result = true;
+        }
+        return result;
+    }
+
 }
