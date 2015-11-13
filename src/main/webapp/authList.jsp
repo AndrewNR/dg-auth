@@ -20,14 +20,17 @@ table {
 	text-align: left;
 	line-height: 26px;
 	border-spacing: 0;
-	border: 2px solid #975997;
 	min-width: 300px;
 	margin-left: 10px;
+	border: 1px solid #888888;
+}
+
+thead tr:last-child th {
+	border-bottom: 1px solid #888888;
 }
 
 thead tr:first-child {
-	background-color: #AAAADD;
-	color: #fff;
+	background-color: #DDDDEE;
 	border: none;
 }
 
@@ -39,12 +42,8 @@ th,th:first-child,td:first-child {
 	padding: 2px 5px;
 }
 
-thead tr:last-child th {
-	border-bottom: 3px solid #ddd;
-}
-
 tbody tr:hover {
-	background-color: #ffeeff;
+	background-color: #FAFAFA;
 }
 
 tbody tr:last-child td {
@@ -52,7 +51,7 @@ tbody tr:last-child td {
 }
 
 tbody td {
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #DDDDDD;
 }
 
 .button {
@@ -61,9 +60,19 @@ tbody td {
 	cursor: pointer;
 }
 
+.button:hover {
+    color: red;
+}
+
 th .button {
     color: white;
     font-size: 1.3em;
+}
+
+th.actionsCol .button {
+    background-color: #8888EE;
+    border-radius: 15px;
+    padding: 2px 5px;
 }
 
 .actionsCol {
