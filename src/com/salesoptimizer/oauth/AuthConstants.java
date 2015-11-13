@@ -12,6 +12,7 @@ public final class AuthConstants {
     public static final String PARAM_CONSUMER_KEY = "consumerKey";
     public static final String PARAM_CONSUMER_SECRET = "consumerSecret";
     public static final String PARAM_REDIRECT_URI = "redirectUri";
+    public static final String PARAM_RETURN_URI = "returnUri";
     
     public static final String PARAM_ERROR_MSG = "errorMsg";
     

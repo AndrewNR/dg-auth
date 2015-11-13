@@ -10,6 +10,7 @@ public class AuthParams {
     private String consumerKey = "";
     private String consumerSecret = "";
     private String redirectUri = "";
+    private String returnUri = "";
     
     public String getOrgId() {
         return orgId;
@@ -40,6 +41,12 @@ public class AuthParams {
     }
     public void setRedirectUri(String redirectUri) {
         this.redirectUri = redirectUri;
+    }
+    public String getReturnUri() {
+        return this.returnUri;
+    }
+    public void setReturnUri(String returnUri) {
+        this.returnUri = returnUri;
     }
     
     public String getAuthTokenKey() {

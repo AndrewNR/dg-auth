@@ -39,7 +39,7 @@ public class AuthorizeServlet extends HttpServlet {
         AuthorizeManager authManager = AuthorizeManager.getInstance();
         if (authManager.isAuthorized(params)) {
             cleanupTempSessionValues(req, resp);
-            respondAuthorized(req, resp, authManager.getAuthToken(params));
+            respondAuthorized(req, resp, params);
             return;
         } else {
             doAuthorize(authManager, params, req, resp);
@@ -51,9 +51,14 @@ public class AuthorizeServlet extends HttpServlet {
         req.getSession().removeAttribute(AuthConstants.SESSION_ATTR_SETTINGS);
     }
 
-    private void respondAuthorized(HttpServletRequest req, HttpServletResponse resp, String authToken) throws ServletException, IOException {
-        req.setAttribute("authToken", authToken);
-        req.getRequestDispatcher("/authSuccess.jsp").forward(req, resp);
+    private void respondAuthorized(HttpServletRequest req, HttpServletResponse resp, AuthParams params) throws ServletException, IOException {
+        req.setAttribute("authToken", AuthorizeManager.getInstance().getAuthToken(params));
+        String returnUri = params != null ? params.getReturnUri() : null;
+        if (CommonUtils.isNotBlank(returnUri)) {
+            resp.sendRedirect(returnUri);
+        } else {
+            req.getRequestDispatcher("/authSuccess.jsp").forward(req, resp);
+        }
     }
 
     private void doAuthorize(AuthorizeManager authManager, AuthParams params,
@@ -110,6 +115,7 @@ public class AuthorizeServlet extends HttpServlet {
         params.setConsumerKey(getParamWithDefault(requestParams, AuthConstants.PARAM_CONSUMER_KEY));
         params.setConsumerSecret(getParamWithDefault(requestParams, AuthConstants.PARAM_CONSUMER_SECRET));
         params.setRedirectUri(getParamWithDefault(requestParams, AuthConstants.PARAM_REDIRECT_URI));
+        params.setReturnUri(getParamWithDefault(requestParams, AuthConstants.PARAM_RETURN_URI));
         return params;
     }
 

@@ -55,11 +55,6 @@ tbody td {
 	border-bottom: 1px solid #ddd;
 }
 
-td:last-child {
-	text-align: right;
-	padding-right: 10px;
-}
-
 .button {
 	color: #696969;
 	padding-right: 5px;

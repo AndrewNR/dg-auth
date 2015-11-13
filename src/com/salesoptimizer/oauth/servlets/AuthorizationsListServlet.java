@@ -25,11 +25,6 @@ public class AuthorizationsListServlet extends HttpServlet {
     
     private static final String ATTR_AVAILABLE_ITEMS = "availableItems";
     
-    private static final String ERROR_MSG_DELETE_SINGLE_NOT_IMPLEMENTED = "Deleting single item not implemented yet.";
-    private static final String ERROR_MSG_DELETE_ALL_NOT_IMPLEMENTED = "Deleting all items not implemented yet.";
-
-
-
     @Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// process list
